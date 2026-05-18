@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="N736DJ">
+<meta name="theme-color" content="#0D0D0D">
+<title>N736DJ Preflight Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: #0D0D0D; color: #F0EBE0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100vh; overscroll-behavior: none; }
+body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.container { max-width: 900px; margin: 0 auto; padding: 1rem; }
+input::placeholder { color: #555; }
+input { font-family: inherit; -webkit-appearance: none; appearance: none; }
+button { font-family: inherit; -webkit-appearance: none; appearance: none; }
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #2A2A2A; flex-wrap: wrap; gap: 8px; }
+.title { font-family: 'Playfair Display', serif; font-size: 24px; color: #B8966A; font-weight: 500; line-height: 1.1; }
+.flight-info { font-size: 12px; color: #888; margin-top: 4px; }
+.header-actions { display: flex; gap: 6px; }
+.btn { padding: 10px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #4A5C74; background: transparent; color: #F0EBE0; font-weight: 400; min-height: 40px; }
+.btn-primary { background: #B8966A; border-color: #B8966A; color: #0D0D0D; font-weight: 500; }
+.btn:active { opacity: 0.7; }
+
+.setup-panel { display: none; background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.setup-panel.open { display: block; }
+.setup-title { font-size: 14px; font-weight: 500; margin-bottom: 10px; color: #F0EBE0; }
+.setup-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.setup-inputs input { background: #0D0D0D; border: 1px solid #4A5C74; color: #F0EBE0; padding: 12px; border-radius: 6px; font-size: 15px; width: 100%; }
+.setup-actions { display: flex; gap: 8px; }
+.setup-actions .btn { flex: 1; }
+.setup-actions .btn-cancel { flex: 0 0 auto; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.tab-btn { background: transparent; color: #F0EBE0; border: 1px solid #4A5C74; padding: 10px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.tab-btn.active { background: #B8966A; color: #0D0D0D; border: none; font-weight: 500; }
+
+.cl-section { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+.cl-header { padding: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; min-height: 56px; }
+.cl-header:active { background: #222; }
+.cl-title-text { font-size: 16px; font-weight: 500; color: #B8966A; font-family: 'Playfair Display', serif; }
+.cl-meta { font-size: 12px; color: #888; margin-top: 2px; }
+.cl-body { display: none; border-top: 1px solid #2A2A2A; }
+.cl-section.open .cl-body { display: block; }
+.cl-section.open .cl-chev { transform: rotate(90deg); }
+.cl-chev { color: #888; transition: transform 0.15s; font-size: 14px; flex-shrink: 0; margin-left: 8px; }
+.cl-item { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid #222; cursor: pointer; min-height: 52px; user-select: none; }
+.cl-item:last-child { border-bottom: none; }
+.cl-item:active { background: #222; }
+.cl-check { width: 26px; height: 26px; border: 2px solid #4A5C74; border-radius: 4px; margin-right: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: transparent; transition: all 0.1s; font-weight: 700; }
+.cl-item.done .cl-check { background: #B8966A; border-color: #B8966A; color: #0D0D0D; }
+.cl-item.done .cl-label { color: #666; text-decoration: line-through; }
+.cl-item.done .cl-value { color: #555; }
+.cl-text { flex: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; }
+.cl-label { font-size: 15px; color: #F0EBE0; }
+.cl-value { font-size: 14px; color: #B8966A; font-weight: 500; text-align: right; }
+.cl-section.complete .cl-title-text { color: #6FA86F; }
+.cl-section.complete .cl-title-text::after { content: " ✓"; }
+
+.progress-bar { height: 4px; background: #2A2A2A; border-radius: 2px; overflow: hidden; margin-top: 6px; width: 100px; }
+.progress-fill { height: 100%; background: #B8966A; transition: width 0.2s; }
+
+.em-section { background: #1A1A1A; border: 1px solid #4A2020; border-radius: 8px; margin-bottom: 10px; }
+.em-header { padding: 12px 14px; background: #2A1515; border-radius: 8px 8px 0 0; font-weight: 500; color: #E89090; font-size: 15px; }
+.em-line { display: flex; justify-content: space-between; padding: 10px 14px; gap: 12px; font-size: 14px; border-top: 1px solid #2A1515; }
+.em-line .lbl { color: #F0EBE0; }
+.em-line .val { color: #E89090; font-weight: 500; text-align: right; }
+
+.vs-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; }
+.vs-row { display: flex; justify-content: space-between; padding: 14px; border-bottom: 1px solid #222; }
+.vs-row:last-child { border-bottom: none; }
+.vs-label { font-size: 15px; color: #F0EBE0; }
+.vs-val { font-size: 15px; color: #B8966A; font-weight: 500; }
+
+.hist-item { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; padding: 14px; margin-bottom: 8px; }
+.hist-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.hist-tail { font-size: 16px; font-weight: 500; color: #B8966A; font-family: 'Playfair Display', serif; }
+.hist-status { font-size: 12px; color: #888; }
+.hist-route { font-size: 14px; color: #F0EBE0; margin-bottom: 4px; }
+.hist-meta { font-size: 12px; color: #888; }
+.hist-delete { background: transparent; border: 1px solid #4A2020; color: #E89090; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 8px; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: #888; }
+.empty-title { font-size: 16px; margin-bottom: 8px; }
+.empty-sub { font-size: 13px; }
+
+.warning-banner { background: #2A1515; border: 1px solid #4A2020; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 13px; color: #E89090; }
+
+@media (max-width: 480px) {
+  .setup-inputs { grid-template-columns: 1fr; }
+  .title { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<div>
+<div class="title">N736DJ Checklist</div>
+<div class="flight-info" id="flight-info">No active flight</div>
+</div>
+<div class="header-actions">
+<button class="btn" id="reset-btn">End flight</button>
+<button class="btn btn-primary" id="new-btn">New flight</button>
+</div>
+</div>
+
+<div class="setup-panel" id="setup-panel">
+<div class="setup-title">Start a new flight</div>
+<div class="setup-inputs">
+<input id="tail-in" type="text" value="N736DJ" placeholder="Tail #" />
+<input id="route-in" type="text" placeholder="Route (KACT to KPWG)" />
+</div>
+<div class="setup-actions">
+<button class="btn btn-primary" id="start-btn">Start flight</button>
+<button class="btn btn-cancel" id="cancel-btn">Cancel</button>
+</div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" data-tab="checklists">Checklists</button>
+<button class="tab-btn" data-tab="emergency">Emergency</button>
+<button class="tab-btn" data-tab="vspeeds">V-Speeds</button>
+<button class="tab-btn" data-tab="history">History</button>
+</div>
+
+<div id="content"></div>
+
+</div>
+
+<script>
+const checklists = [
+  { name: "Cabin", items: [
+    ["Hobbs/Tach", "Record"],
+    ["A.R.O.W. Documents", "In Aircraft"],
+    ["Parking Brake", "Set"],
+    ["Control Wheel Lock", "Remove"],
+    ["Ignition Switch", "Off"],
+    ["Radios/Electrical", "Off"],
+    ["Master Switch", "On"],
+    ["Fuel Gauges", "Check Quantity"],
+    ["Flaps", "Down for Inspection"],
+    ["Exterior Lights", "Check Operation"],
+    ["Master Switch", "Off"],
+    ["Fuel Selector", "Both"]
+  ]},
+  { name: "Left Wing", items: [
+    ["Wheel Chocks", "Remove"],
+    ["Wheel/Brake", "Inspect"],
+    ["Fuel Tank Sump", "Sample"],
+    ["Fuel Quantity", "Use Fuel Straw"],
+    ["Fuel Cap", "Secure"],
+    ["Fuel Tank Vent", "Clear"],
+    ["Stall Warning Vent", "Clear"],
+    ["Pitot Tube", "Clear"],
+    ["Wing Tie-down", "Remove"],
+    ["Aileron", "Moves Freely"],
+    ["Flap Track & Actuator", "Secure"]
+  ]},
+  { name: "Tail Section", items: [
+    ["Baggage Door", "Closed & Locked"],
+    ["Fuselage", "Inspect"],
+    ["Tail Tie-Down", "Remove"],
+    ["Elevator/Trim Tab", "Moves Freely (avoid bending trim tab)"],
+    ["Rudder/Cables", "Moves Freely"]
+  ]},
+  { name: "Right Wing", items: [
+    ["Flap Track & Actuator", "Secure"],
+    ["Aileron", "Moves Freely"],
+    ["Wing Tie-down", "Remove"],
+    ["Wheel Chocks", "Remove"],
+    ["Wheel/Brake", "Inspect"],
+    ["Fuel Tank Sump", "Sample"],
+    ["Fuel Quantity", "Use Fuel Straw"],
+    ["Fuel Cap", "Secure"]
+  ]},
+  { name: "Nose", items: [
+    ["Engine Oil Level", "\u2265 5 qts"],
+    ["Fuel Strainer", "Strain"],
+    ["Air Inlets", "Clear"],
+    ["Propeller", "Inspect"],
+    ["Air Filter", "Check"],
+    ["Nose Wheel Chocks", "Remove"],
+    ["Nose Wheel", "Inspect"],
+    ["Shock Strut", "3 FINGER SPACING"],
+    ["Static Port", "Clear"]
+  ]},
+  { name: "Starting Engine", items: [
+    ["Seat Belts/Harnesses", "Secure"],
+    ["Throttle", "Slight"],
+    ["Mixture", "Rich"],
+    ["Prop", "Full"],
+    ["Master Switch", "On"],
+    ["Beacon", "On"],
+    ["Fuel Pump", "High 6-8 GPH"],
+    ["Fuel Pump", "OFF"],
+    ["Propeller Area", "Clear"],
+    ["Ignition", "Start"],
+    ["Throttle", "800-1000 RPM"],
+    ["Oil Pressure", "Check Normal"],
+    ["Ammeter", "Check"],
+    ["Mixture", "Lean for Taxi"],
+    ["Transponder", "On"],
+    ["Avionics Switch", "On"],
+    ["Flaps", "Retract"]
+  ]},
+  { name: "Before Taxi", items: [
+    ["Exterior Lights", "As Required"],
+    ["Radios", "Set Frequencies"],
+    ["Heading Indicator", "Set"],
+    ["Transponder", "Verify ALT"],
+    ["Circuit Breakers", "Check In"],
+    ["AWOS/ASOS/ATIS", "Obtain"],
+    ["Altimeter", "Set"],
+    ["CTAF/Ground", "Communicate"],
+    ["Parking Brake", "Release"],
+    ["Taxi Area", "Clear"],
+    ["Brakes", "Test"]
+  ]},
+  { name: "Run-up / Before Takeoff", items: [
+    ["Parking Brake", "Set"],
+    ["Seat Belts/Harnesses", "Fastened"],
+    ["Cabin Doors/Windows", "Locked"],
+    ["Flight Controls", "Free and Correct"],
+    ["Flight Instruments", "Check"],
+    ["Fuel Quantity", "Check"],
+    ["Fuel Selector", "Both"],
+    ["Mixture", "Best Power"],
+    ["Elevator", "Set for T/O"],
+    ["Throttle", "1800 RPM"],
+    ["Magnetos", "Check L/R (125 max drop / 50 max diff)"],
+    ["Prop", "Cycle 3 Times, then Full"],
+    ["Oil Pressure", "Check Normal"],
+    ["Oil Temperature", "Check"],
+    ["Suction Gauge", "Check (4.6 - 5.4)"],
+    ["Ammeter", "Test Alternator"],
+    ["Throttle", "Check Idle"],
+    ["Throttle", "1000 RPM"],
+    ["Throttle Friction Lock", "Set"],
+    ["Mixture", "Best Power"],
+    ["Radios/Nav", "Set"],
+    ["Wing Flaps", "As Required"],
+    ["Landing Light", "On"],
+    ["Safety Briefing", "Complete"],
+    ["Parking Brake", "Release"],
+    ["Safety Circle", "Execute"],
+    ["Time", "Note time"]
+  ]},
+  { name: "Enroute Climb", items: [
+    ["Airspeed", "85-95 KIAS"],
+    ["Manifold/Throttle", "25\" / 2500 RPM"],
+    ["Departure Area", "Clear"],
+    ["Radio Comms", "As Required"]
+  ]},
+  { name: "Cruise", items: [
+    ["Manifold/Throttle", "21\" / 2300 RPM"],
+    ["Mixture", "Lean"],
+    ["Landing Light", "Off"],
+    ["Heading Indicator", "Reset"]
+  ]},
+  { name: "Descent", items: [
+    ["Radios", "Set"],
+    ["AWOS/ATIS", "Obtain"],
+    ["Seat Belts/Harness", "Fastened"],
+    ["Heading Indicator", "Set"],
+    ["Fuel Selector", "Both"],
+    ["Mixture", "Best Power"],
+    ["Power", "Reduce"],
+    ["Cowl Flap", "As Needed"],
+    ["Landing Light", "On"],
+    ["Flaps", "As Required"]
+  ]},
+  { name: "Before Landing (ABCCGUMPPSS)", items: [
+    ["A \u2014 Airspeed", "65-70 KIAS"],
+    ["B \u2014 Brakes", "Check"],
+    ["C \u2014 Carb Heat", "As Required"],
+    ["C \u2014 Cowl Flaps", "As Required"],
+    ["G \u2014 Gas", "Both / Fullest"],
+    ["U \u2014 Undercarriage", "Down (fixed)"],
+    ["M \u2014 Mixture", "Rich"],
+    ["P \u2014 Prop", "Full Forward"],
+    ["P \u2014 Pump", "As Required"],
+    ["S \u2014 Seat Belts", "Secure"],
+    ["S \u2014 Switches", "Lights On"],
+    ["S \u2014 Speed", "65-70 KIAS"]
+  ]},
+  { name: "After Landing", items: [
+    ["Flaps", "Retract"],
+    ["Mixture", "Lean"],
+    ["Cowl Flap", "Open"],
+    ["Landing/Taxi Light", "As Required"],
+    ["Elevator Trim", "Neutral"],
+    ["Taxi Clearance", "Obtain"]
+  ]},
+  { name: "Shutdown", items: [
+    ["Parking Brake", "Set"],
+    ["Interior Lights", "Off"],
+    ["Exterior Lights (except beacon)", "Off"],
+    ["Radios", "Off"],
+    ["Throttle", "1000 RPM"],
+    ["Ignition", "Check Off/ON"],
+    ["Mixture", "Idle Cut-Off"],
+    ["Ignition (after prop stops)", "Off"],
+    ["Beacon", "Off"],
+    ["Master Switch", "Off"]
+  ]},
+  { name: "Securing Aircraft", items: [
+    ["Control Lock", "Install"],
+    ["Hobbs/Tach", "Record"],
+    ["Fuel Selector", "Left/Right"],
+    ["Cabin Interior", "Clean"],
+    ["Doors/Windows", "Closed"],
+    ["Tie-downs/Chocks", "As Required"],
+    ["Pitot Cover", "Install"]
+  ]}
+];
+
+const emergencies = [
+  { name: "Engine Fail at Takeoff Roll", lines: [["Throttle", "Idle"], ["Brakes", "Apply"]]},
+  { name: "Engine Failure During Takeoff (runway available)", lines: [["Action", "Land straight ahead"]]},
+  { name: "Engine Failure During Takeoff (no runway)", lines: [
+    ["Best Glide", "70 KIAS"],
+    ["Turns", "Shallow, avoid obstacles"],
+    ["Flaps", "As required"]
+  ]},
+  { name: "Engine Failure In Flight (restart)", lines: [
+    ["Airspeed (VG)", "75 KIAS"],
+    ["Landing Area", "SELECT"],
+    ["Fuel", "BOTH"],
+    ["Throttle", "1/4\""],
+    ["Mixture", "RICH"],
+    ["Primer", "IN and LOCKED"],
+    ["Ignition", "BOTH or START"],
+    ["Master Switch", "ON"]
+  ]},
+  { name: "Power OFF Landing", lines: [
+    ["Trim Best Glide", "70 KIAS"],
+    ["Touchdown", "Slowest possible, full flaps"],
+    ["Radios", "121.5 / ATC"],
+    ["Transponder", "Squawk 7700"],
+    ["Seat Backs", "Most Upright"],
+    ["Seat Belts", "Secure"],
+    ["Fuel Selector", "OFF"],
+    ["Throttle", "IDLE"],
+    ["Mixture", "IDLE CUT-OFF"],
+    ["Ignition", "OFF"],
+    ["Master Switch", "OFF (when landing assured)"],
+    ["Doors", "UNLATCH"],
+    ["Touchdown", "Slightly Tail-Low"]
+  ]},
+  { name: "Engine Fire During Start", lines: [
+    ["Starter", "Continue Cranking"],
+    ["If starts: Power", "1800 RPM, few minutes"],
+    ["Then", "Shutdown and Inspect"],
+    ["If fails: Throttle", "Full Open"],
+    ["Mixture", "IDLE CUT-OFF"],
+    ["Cranking", "Continue"],
+    ["Master Switch", "OFF"],
+    ["Ignition", "OFF"],
+    ["Fuel Selector", "OFF"],
+    ["Fire Extinguisher", "Activate"],
+    ["Exit", "Behind Aircraft"]
+  ]},
+  { name: "Engine Fire In Flight", lines: [
+    ["Mixture", "IDLE CUT-OFF"],
+    ["Fuel Selector", "OFF"],
+    ["Master Switch", "OFF"],
+    ["Cabin Heat/Air", "OFF"],
+    ["Action", "Emergency descent + power-off landing"]
+  ]},
+  { name: "Electrical Fire / Smoke in Cabin", lines: [
+    ["Master Switch", "OFF"],
+    ["Vents", "CLOSED"],
+    ["Cabin Heat", "OFF"],
+    ["Avionics/Electrical", "OFF"],
+    ["All Switches (except ignition)", "OFF"],
+    ["Vents/Cabin air", "OPEN"],
+    ["Master Switch", "ON"],
+    ["Circuit Breakers", "DO NOT RESET"],
+    ["Radio Switches", "OFF"],
+    ["Electrical/Avionics", "ON one at a time"],
+    ["Once localized", "Land ASAP"]
+  ]},
+  { name: "Electrical Failure In Flight", lines: [
+    ["Ammeter", "Verify Discharge"],
+    ["Circuit Breaker", "CHECK / RESET"],
+    ["If no power: Master", "ON"],
+    ["Action", "Reduce load and land"]
+  ]}
+];
+
+const vspeeds = [
+  ["VSO (stall, landing config)", "46 KIAS"],
+  ["VS1 (stall, clean)", "54 KIAS"],
+  ["VR (rotation)", "55 KIAS"],
+  ["VX (best angle climb)", "60 KIAS"],
+  ["VY (best rate climb)", "81 KIAS"],
+  ["VFE (max flaps extended)", "85 KIAS"],
+  ["VA (maneuvering, max gross)", "105 KIAS"],
+  ["VNO (max structural cruise)", "129 KIAS"],
+  ["VNE (never exceed)", "163 KIAS"],
+  ["VG (best glide)", "62-75 KIAS"]
+];
+
+let activeFlight = null;
+let state = {};
+let currentTab = "checklists";
+
+const STORAGE_KEY = "n736dj_active";
+const HISTORY_KEY = "n736dj_history";
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      activeFlight = parsed.flight;
+      state = parsed.state || {};
+    }
+  } catch (e) {}
+}
+
+function saveState() {
+  if (!activeFlight) {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ flight: activeFlight, state }));
+  } catch (e) {}
+}
+
+function getHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function saveHistoryEntry(entry) {
+  try {
+    const history = getHistory();
+    history.unshift(entry);
+    if (history.length > 100) history.length = 100;
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch (e) {}
+}
+
+function deleteHistoryEntry(idx) {
+  try {
+    const history = getHistory();
+    history.splice(idx, 1);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch (e) {}
+}
+
+function updateHeader() {
+  const info = document.getElementById("flight-info");
+  if (activeFlight) {
+    const d = new Date(activeFlight.started);
+    const dateStr = d.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    info.textContent = activeFlight.tail + " \u2022 " + (activeFlight.route || "no route") + " \u2022 " + dateStr;
+  } else {
+    info.textContent = "No active flight";
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, function(c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+function renderChecklists() {
+  const c = document.getElementById("content");
+  if (!activeFlight) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-title">No active flight</div><div class="empty-sub">Tap "New flight" to begin</div></div>';
+    return;
+  }
+  let html = "";
+  checklists.forEach(function(section, sIdx) {
+    const total = section.items.length;
+    let done = 0;
+    section.items.forEach(function(_, iIdx) {
+      if (state[sIdx + "_" + iIdx]) done++;
+    });
+    const complete = done === total;
+    const pct = Math.round((done / total) * 100);
+    html += '<div class="cl-section' + (complete ? " complete" : "") + '" data-section="' + sIdx + '">';
+    html += '<div class="cl-header"><div>';
+    html += '<div class="cl-title-text">' + escapeHtml(section.name) + '</div>';
+    html += '<div class="cl-meta">' + done + ' of ' + total + '</div>';
+    html += '<div class="progress-bar"><div class="progress-fill" style="width: ' + pct + '%"></div></div>';
+    html += '</div><span class="cl-chev">\u25B6</span></div>';
+    html += '<div class="cl-body">';
+    section.items.forEach(function(item, iIdx) {
+      const checked = state[sIdx + "_" + iIdx];
+      html += '<div class="cl-item' + (checked ? " done" : "") + '" data-key="' + sIdx + '_' + iIdx + '">';
+      html += '<div class="cl-check">\u2713</div>';
+      html += '<div class="cl-text"><span class="cl-label">' + escapeHtml(item[0]) + '</span><span class="cl-value">' + escapeHtml(item[1]) + '</span></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  c.innerHTML = html;
+
+  c.querySelectorAll(".cl-header").forEach(function(h) {
+    h.addEventListener("click", function() { h.parentElement.classList.toggle("open"); });
+  });
+  c.querySelectorAll(".cl-item").forEach(function(item) {
+    item.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const key = item.dataset.key;
+      state[key] = !state[key];
+      item.classList.toggle("done");
+      saveState();
+      const section = item.closest(".cl-section");
+      const sIdx = parseInt(section.dataset.section);
+      const total = checklists[sIdx].items.length;
+      let done = 0;
+      checklists[sIdx].items.forEach(function(_, iIdx) { if (state[sIdx + "_" + iIdx]) done++; });
+      section.querySelector(".cl-meta").textContent = done + " of " + total;
+      section.querySelector(".progress-fill").style.width = Math.round((done/total)*100) + "%";
+      section.classList.toggle("complete", done === total);
+    });
+  });
+}
+
+function renderEmergency() {
+  const c = document.getElementById("content");
+  let html = '<div class="warning-banner">Reference only. Does not replace the POH.</div>';
+  emergencies.forEach(function(em) {
+    html += '<div class="em-section">';
+    html += '<div class="em-header">' + escapeHtml(em.name) + '</div>';
+    em.lines.forEach(function(line) {
+      html += '<div class="em-line"><span class="lbl">' + escapeHtml(line[0]) + '</span><span class="val">' + escapeHtml(line[1]) + '</span></div>';
+    });
+    html += '</div>';
+  });
+  c.innerHTML = html;
+}
+
+function renderVSpeeds() {
+  const c = document.getElementById("content");
+  let html = '<div class="vs-card">';
+  vspeeds.forEach(function(v) {
+    html += '<div class="vs-row"><span class="vs-label">' + escapeHtml(v[0]) + '</span><span class="vs-val">' + escapeHtml(v[1]) + '</span></div>';
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+function renderHistory() {
+  const c = document.getElementById("content");
+  const history = getHistory();
+  if (history.length === 0) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-title">No flight history yet</div><div class="empty-sub">Completed flights appear here</div></div>';
+    return;
+  }
+  let html = "";
+  history.forEach(function(d, idx) {
+    const date = new Date(d.started).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+    const completed = d.completed ? "Completed" : "Logged";
+    html += '<div class="hist-item">';
+    html += '<div class="hist-row"><div class="hist-tail">' + escapeHtml(d.tail) + '</div><div class="hist-status">' + completed + '</div></div>';
+    html += '<div class="hist-route">' + escapeHtml(d.route || "No route logged") + '</div>';
+    html += '<div class="hist-meta">' + date + ' \u2022 ' + (d.itemsChecked || 0) + ' items checked</div>';
+    html += '<button class="hist-delete" data-idx="' + idx + '">Delete</button>';
+    html += '</div>';
+  });
+  c.innerHTML = html;
+  c.querySelectorAll(".hist-delete").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      if (confirm("Delete this flight from history?")) {
+        deleteHistoryEntry(parseInt(btn.dataset.idx));
+        renderHistory();
+      }
+    });
+  });
+}
+
+function render() {
+  if (currentTab === "checklists") renderChecklists();
+  else if (currentTab === "emergency") renderEmergency();
+  else if (currentTab === "vspeeds") renderVSpeeds();
+  else if (currentTab === "history") renderHistory();
+  updateHeader();
+}
+
+document.querySelectorAll(".tab-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+    currentTab = btn.dataset.tab;
+    render();
+  });
+});
+
+document.getElementById("new-btn").addEventListener("click", function() {
+  document.getElementById("setup-panel").classList.add("open");
+});
+document.getElementById("cancel-btn").addEventListener("click", function() {
+  document.getElementById("setup-panel").classList.remove("open");
+});
+document.getElementById("start-btn").addEventListener("click", function() {
+  const tail = document.getElementById("tail-in").value.trim() || "N736DJ";
+  const route = document.getElementById("route-in").value.trim();
+  if (activeFlight) {
+    let count = 0;
+    Object.values(state).forEach(function(v) { if (v) count++; });
+    saveHistoryEntry(Object.assign({}, activeFlight, { completed: false, itemsChecked: count, ended: Date.now() }));
+  }
+  activeFlight = { tail: tail, route: route, started: Date.now() };
+  state = {};
+  saveState();
+  document.getElementById("setup-panel").classList.remove("open");
+  document.getElementById("route-in").value = "";
+  render();
+});
+document.getElementById("reset-btn").addEventListener("click", function() {
+  if (!activeFlight) return;
+  if (!confirm("End the current flight and log it to history?")) return;
+  let count = 0;
+  Object.values(state).forEach(function(v) { if (v) count++; });
+  saveHistoryEntry(Object.assign({}, activeFlight, { completed: true, itemsChecked: count, ended: Date.now() }));
+  activeFlight = null;
+  state = {};
+  saveState();
+  render();
+});
+
+loadState();
+render();
+</script>
+</body>
+</html>
